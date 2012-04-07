@@ -1,0 +1,40 @@
+#!/bin/sh
+
+NAME=`basename "$0"`
+
+USAGE="usage: $NAME -e <env name> [database]"
+
+ENV_NAME="$2"
+DB_NAME="$3"
+
+##########################################################
+# Parse Args
+
+if [ $# -lt 2 -o $# -gt 3 ]; then
+	echo "$USAGE"
+	echo "dblogin -e qa {schema}"
+	exit 1
+fi
+
+if [ "$1" != "-e" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+##########################################################
+# 
+
+dbArgs=`dbargs -e $ENV_NAME`
+
+if [ ! -z "${DB_NAME}" ]; then
+	dbArgs=` echo "${dbArgs}" | sed s/{schema}/$DB_NAME/ `
+fi
+
+#dblogin -e qa {schema}
+sqlplus ${dbArgs}
+
+
+
+
+
+

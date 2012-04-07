@@ -1,0 +1,43 @@
+#!/bin/sh
+
+NAME=`basename "$0"`
+
+USAGE="usage: $NAME -e <env name> [database] <sql str> [sql args]"
+
+    E_FLAG="$1"
+  ENV_NAME="$2"
+   DB_NAME="$3"
+   SQL_STR="$4"
+  SQL_ARGS="$5"
+
+##########################################################
+# Parse Args
+
+if [ $# -ne 4 -a $# -ne 5 ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+if [ "$E_FLAG" != "-e" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+if [ -z "$SQL_STR" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+##########################################################
+#
+
+dbArgs=`dbargs -e $ENV_NAME`
+
+if [ ! -z "${DB_NAME}" ]; then
+	dbArgs=` echo "${dbArgs}" | sed s/{env}/$DB_NAME/ `
+fi
+
+sqlplus ${dbArgs} $SQL_ARGS <<ENDOFSQL
+$SQL_STR;
+exit;
+ENDOFSQL

@@ -1,0 +1,37 @@
+#!/bin/sh
+
+NAME=`basename "$0"`
+
+USAGE="usage: $NAME <env name> <key name>"
+
+ENV_NAME="$1"
+KEY_NAME="$2"
+
+CONFIG_PATH={path to config file with key.value}
+
+##########################################################
+# Parse Args
+
+if [ ! -f "$CONFIG_PATH" ]; then
+	echo "$CONFIG_PATH: file not found .. (exiting)"
+	exit 1
+fi
+
+if [ $# -ne 2 ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+##########################################################
+# Value for Key
+
+configKey="${ENV_NAME}.${KEY_NAME}"
+
+entry=`grep "^${configKey}" "${CONFIG_PATH}"`
+
+if [ -z "$entry" ]; then
+	echo "{$configKey-notfound}"
+else
+	echo "$entry" | sed -e 's/.*=//'
+fi
+
