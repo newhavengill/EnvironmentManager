@@ -1,0 +1,38 @@
+#!/bin/sh
+
+NAME=`basename "$0"`
+
+USAGE="usage: $NAME -e <env name> <file name> [mysql opts]"
+
+  ENV_NAME="$2"
+ FILE_NAME="$3"
+MYSQL_OPTS="$4"
+
+##########################################################
+# Parse Args
+
+if [ $# -ne 3 -a $# -ne 4 ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+if [ "$1" != "-e" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+if [ -z "$FILE_NAME" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+if [ ! -f "$FILE_NAME" ]; then
+	echo "$FILE_NAME: no such file .. (exiting)"
+	exit 1
+fi
+
+##########################################################
+# 
+
+mysql $MYSQL_OPTS `dbargs -e $ENV_NAME` < "${FILE_NAME}"
+

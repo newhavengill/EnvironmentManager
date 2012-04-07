@@ -1,0 +1,67 @@
+#!/usr/bin/env perl
+
+# 
+# Performs docroot synchronization for various environments.
+#  
+# Usage:
+#   % dbstartup -e envname
+#
+use strict;
+use Cwd 'abs_path';
+use Getopt::Std;
+use XML::XPath;
+
+my $sshUser = "{FOO}";
+
+our ($opt_e);
+getopts('e:');
+
+die "Environment option missing! Usage:\n\dbstartup -e envname\n" unless $opt_e;
+die "*** dbstartup is not supported for 'production' environment!\n" if("$opt_e" eq "production");
+
+abs_path($0) =~ m#^(.+)/[^/]+$#;
+my $envRoot = abs_path("$1/../../$opt_e");
+my $envConf = "$envRoot/etc/mysql.cnf";
+
+my $dbargs=`dbargsSansDatabase -e $opt_e`;
+chomp($dbargs);
+
+my $host = ($dbargs =~ /--host=([^\s]+)/) 
+	? $1 
+	: '127.0.0.1';
+
+# Local
+if("$host" eq "127.0.0.1" || "$host" eq "localhost") {
+	my $conf = (-f $envConf) ? $envConf : "$ENV{'HOME'}/{path to config file with key.value}";
+	my $startCommand = "mysqld_safe --defaults-file=\"$conf\" --log-slow-queries=/tmp/mysql-slow-queries.log --log-queries-not-using-indexes >/dev/null 2>&1 &";
+	
+	print "Will start local DB: $startCommand\n";
+	die "Failed to start MySQL: $!\n" if system($startCommand);
+	print "Started local DB...\n";
+}
+# Remote
+else {
+	
+	my $conf;
+	
+	# transfer config to remote location
+	if(-f $envConf) {
+		$conf = "/tmp/dbstartup_mysql.cnf";
+		
+		my $scpCommand = "scp $envConf $sshUser\@$host:$conf";
+		print "Transferring config file to the target host: $scpCommand\n";
+		die "Failed to transfer config file: $!\n" if system($scpCommand);
+	}
+	# assume existing config in the user remote HOME
+	else {
+		$conf = "{path to config file with key.value}";
+	}
+	
+	my $startCommand = "echo 'mysqld_safe --defaults-file=\"$conf\" --log-slow-queries --log-queries-not-using-indexes >/dev/null 2>&1 &' |ssh $sshUser\@$host";
+	
+	print "Will start remote DB: $startCommand\n";
+	die "Failed to start remote MySQL: $!\n" if system($startCommand);
+	print "Started remote DB...\n";
+}
+
+

@@ -1,0 +1,48 @@
+#!/bin/sh
+
+NAME=`basename "$0"`
+
+USAGE="usage: $NAME -e <env name> [database]"
+
+ENV_NAME="$2"
+DB_NAME="$3"
+
+##########################################################
+# Parse Args
+
+if [ $# -lt 2 -o $# -gt 3 ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+if [ "$1" != "-e" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+##########################################################
+# 
+
+_mysqlMajorVersionNumber() {
+	mysql --version | sed -e 's/.* Distrib \(.*\),.*/\1/' | cut -f 1 -d .
+}
+
+##########################################################
+# 
+
+dbArgs=`dbargs -e $ENV_NAME`
+dbArgs="$dbArgs --default-character-set=utf8"
+
+if [ ! -z "${DB_NAME}" ]; then
+	dbArgs=` echo "${dbArgs}" | sed s/{db}$/$DB_NAME/ `
+fi
+
+uppercaseENV_NAME=`  echo $ENV_NAME | tr "[a-z]" "[A-Z]"  `
+
+
+if [ `_mysqlMajorVersionNumber` -ge 5 ]; then
+	mysql -A ${dbArgs} --prompt "{$uppercaseENV_NAME} \u.\d > "
+else
+	mysql -A ${dbArgs}
+fi
+

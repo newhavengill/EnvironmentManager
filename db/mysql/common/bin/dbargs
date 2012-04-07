@@ -1,0 +1,27 @@
+#!/bin/sh
+
+NAME=`basename "$0"`
+
+USAGE="usage: $NAME -e <env name>"
+
+ENV_NAME="$2"
+
+##########################################################
+# Parse Args
+
+if [ $# -ne 2 ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+if [ "$1" != "-e" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+##########################################################
+# 
+
+cv=`ueConfigValueForKey "$ENV_NAME" "db.database"`
+
+echo `dbargsSansDatabase -e $ENV_NAME` --database=$cv

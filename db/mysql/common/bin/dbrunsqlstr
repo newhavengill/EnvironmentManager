@@ -1,0 +1,35 @@
+#!/bin/sh
+
+NAME=`basename "$0"`
+
+USAGE="usage: $NAME -e <env name> <sql str> [mysql args]"
+
+    E_FLAG="$1"
+  ENV_NAME="$2"
+   SQL_STR="$3"
+MYSQL_ARGS="$4"
+
+##########################################################
+# Parse Args
+
+if [ $# -ne 3 -a $# -ne 4 ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+if [ "$E_FLAG" != "-e" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+if [ -z "$SQL_STR" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+##########################################################
+# 
+
+echo "$SQL_STR" | mysql `dbargs -e $ENV_NAME` $MYSQL_ARGS
+
+

@@ -1,0 +1,39 @@
+#!/usr/bin/env perl
+
+# 
+# Performs docroot synchronization for various environments.
+#  
+# Usage:
+#   % dbshutdown -e envname
+#
+use strict;
+use Cwd 'abs_path';
+use Getopt::Std;
+use XML::XPath;
+
+my $sshUser = "FOO";
+
+our ($opt_e);
+getopts('e:');
+
+die "Environment option missing! Usage:\n\dbshutdown -e envname\n" unless $opt_e;
+die "*** dbshutdown is not supported for 'production' environment!\n" if("$opt_e" eq "production");
+
+my $dbargs=`dbargsSansDatabase -e $opt_e`;
+chomp($dbargs);
+
+
+my $host = ($dbargs =~ /--host=([^\s]+)/) 
+	? $1 
+	: '127.0.0.1';
+
+# in ssh mode, MySQL location is not in the sh path, so we need to rely on bash
+my $stop = ("$host" eq "127.0.0.1" || "$host" eq "localhost") 
+	? "mysqladmin $dbargs shutdown" 
+	: "echo 'mysqladmin $dbargs shutdown' |ssh $sshUser\@$host";
+
+my $stopPrintable = $stop;
+$stopPrintable =~ s/password=([^\s]+)/password=*****/;
+
+print "Stopping MySQL in $opt_e: $stopPrintable\n";
+die "Failed to stop MySQL" if system($stop);
