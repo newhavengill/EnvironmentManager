@@ -2,14 +2,15 @@
 
 NAME=`basename "$0"`
 
-USAGE="usage: $NAME -e <env name>"
+USAGE="usage: $NAME -e <env name> [database]"
 
 ENV_NAME="$2"
+DB_NAME="$3"
 
 ##########################################################
 # Parse Args
 
-if [ $# -ne 2 ] ; then
+if [ $# -ne 3 ] ; then
 	echo "$USAGE"
 	exit 1
 fi
@@ -21,6 +22,5 @@ fi
 
 ##########################################################
 # 
-
 cv=`ueConfigValueForKey "$ENV_NAME" "db.database"`
-echo `dbargsSansDatabase -e $ENV_NAME`
+echo `dbargsSansDatabase -e $ENV_NAME $DB_NAME`

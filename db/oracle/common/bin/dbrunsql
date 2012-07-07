@@ -3,6 +3,7 @@
 NAME=`basename "$0"`
 
 USAGE="usage: $NAME -e <env name> [database] <file name> [sql opts]"
+
   ENV_NAME="$2"
    DB_NAME="$3"
  FILE_NAME="$4"
@@ -10,11 +11,6 @@ USAGE="usage: $NAME -e <env name> [database] <file name> [sql opts]"
 
 ##########################################################
 # Parse Args
-
-#if [ $# -ne 4 -a $# -ne 5 ]; then
-#	echo "$USAGE"
-#	exit 1
-#fi
 
 if [ "$1" != "-e" ]; then
 	echo "$USAGE"
@@ -31,12 +27,11 @@ if [ ! -f "$FILE_NAME" ]; then
 	exit 1
 fi
 
-dbArgs=`dbargs -e $ENV_NAME`
-echo ${dbArgs}
-if [ ! -z "${DB_NAME}" ]; then
+dbArgs=`dbargs -e $ENV_NAME $DB_NAME`
+
+if [  -z "${DB_NAME}" ]; then
 	dbArgs=` echo "${dbArgs}" | sed s/{schema}/$DB_NAME/ `
+	echo "FAIL: No Database" $dbArgs
 fi
 
 sqlplus "${dbArgs}" @${FILE_NAME}
-
-

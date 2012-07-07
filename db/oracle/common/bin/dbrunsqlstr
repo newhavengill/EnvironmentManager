@@ -13,11 +13,6 @@ USAGE="usage: $NAME -e <env name> [database] <sql str> [sql args]"
 ##########################################################
 # Parse Args
 
-if [ $# -ne 4 -a $# -ne 5 ]; then
-	echo "$USAGE"
-	exit 1
-fi
-
 if [ "$E_FLAG" != "-e" ]; then
 	echo "$USAGE"
 	exit 1
@@ -31,10 +26,11 @@ fi
 ##########################################################
 #
 
-dbArgs=`dbargs -e $ENV_NAME`
+dbArgs=`dbargs -e $ENV_NAME $DB_NAME`
 
-if [ ! -z "${DB_NAME}" ]; then
-	dbArgs=` echo "${dbArgs}" | sed s/{env}/$DB_NAME/ `
+if [  -z "${DB_NAME}" ]; then
+	dbArgs=` echo "${dbArgs}" | sed s/{schema}/$DB_NAME/ `
+	echo "FAIL: No Database" $dbArgs	
 fi
 
 sqlplus ${dbArgs} $SQL_ARGS <<ENDOFSQL

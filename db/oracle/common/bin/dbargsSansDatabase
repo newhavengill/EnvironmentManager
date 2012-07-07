@@ -2,15 +2,16 @@
 
 NAME=`basename "$0"`
 
-USAGE="usage: $NAME -e <env name>"
+USAGE="usage: $NAME -e <env name> [database]"
 
 ENV_NAME="$2"
+DB_NAME="$3"
 
 ##########################################################
 # Parse Args
 
 
-if [ $# -ne 2 ] ; then
+if [ $# -ne 3 ] ; then
 	echo "$USAGE"
 	exit 1
 fi
@@ -23,11 +24,11 @@ fi
 
 ##########################################################
 #
-	host=`ueConfigValueForKey "$ENV_NAME" "db.host"`
-username=`ueConfigValueForKey "$ENV_NAME" "db.username"`
-password=`ueConfigValueForKey "$ENV_NAME" "db.password"`
-	port=`ueConfigValueForKey "$ENV_NAME" "db.port"`
-  domain=`ueConfigValueForKey "$ENV_NAME" "db.domain"`
+	host=`ueConfigValueForKey "$DB_NAME"".""$ENV_NAME" "db.host"`
+username=`ueConfigValueForKey "$DB_NAME"".""$ENV_NAME" "db.username"`
+password=`ueConfigValueForKey "$DB_NAME"".""$ENV_NAME" "db.password"`
+	port=`ueConfigValueForKey "$DB_NAME"".""$ENV_NAME" "db.port"`
+  domain=`ueConfigValueForKey "$DB_NAME"".""$ENV_NAME" "db.domain"`
 
 echo "$username/$password@//$host:$port/$domain"
 

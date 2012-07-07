@@ -7,7 +7,7 @@ USAGE="usage: $NAME <env name> <key name>"
 ENV_NAME="$1"
 KEY_NAME="$2"
 
-CONFIG_PATH={path to config file with key.value}
+CONFIG_PATH="{path to config file with key.value}"
 
 ##########################################################
 # Parse Args

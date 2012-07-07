@@ -12,7 +12,7 @@ DB_NAME="$3"
 
 if [ $# -lt 2 -o $# -gt 3 ]; then
 	echo "$USAGE"
-	echo "dblogin -e qa {schema}"
+	echo "dblogin -e {env} {schema}"
 	exit 1
 fi
 
@@ -24,14 +24,15 @@ fi
 ##########################################################
 # 
 
-dbArgs=`dbargs -e $ENV_NAME`
+dbArgs=`dbargs -e $ENV_NAME $DB_NAME`
 
-if [ ! -z "${DB_NAME}" ]; then
+if [ -z "${DB_NAME}" ]; then
 	dbArgs=` echo "${dbArgs}" | sed s/{schema}/$DB_NAME/ `
+	echo "FAIL: No Database" $dbArgs
 fi
 
-#dblogin -e qa {schema}
-sqlplus ${dbArgs}
+sqlplus ${dbArgs} 
+# echo ${dbArgs}
 
 
 
